@@ -1,3 +1,10 @@
+/**
+ * Classe principal do projeto
+ * 
+ * @author  Pedro Vinícius Borges Basseto
+ * @version 1.00, 17/03/14
+ * 
+ */
 package com.example.apptestecoderockr;
 
 import android.os.Bundle;
