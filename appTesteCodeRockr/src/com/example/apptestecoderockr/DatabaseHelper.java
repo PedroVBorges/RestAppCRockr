@@ -9,7 +9,6 @@ package com.example.apptestecoderockr;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -19,7 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	private static final int DATABASE_VERSION = 1;
 	public Context contexto;
 
-	public DatabaseHelper(Context context, String name, CursorFactory factory, int version) {
+	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.contexto = context;
 	}
@@ -70,6 +69,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 		Log.v("Banco : ","Deletando Tabelas do database");
 		db.execSQL("DROP TABLE IF EXISTS marcas");
 		db.execSQL("DROP TABLE IF EXISTS produtos");
+	}
+	
+	/* Classe para Limpar a tabela */
+	public void ClearTables(SQLiteDatabase db){
+		Log.v("Banco : ","Limpando Tabelas do database");
+		db.execSQL("DELETE FROM marcas");
+		db.execSQL("DELETE FROM produtos");		
 	}
 
 }
