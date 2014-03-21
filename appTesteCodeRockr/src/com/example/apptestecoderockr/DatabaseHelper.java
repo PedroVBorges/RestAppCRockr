@@ -7,9 +7,16 @@
  */
 package com.example.apptestecoderockr;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper{
@@ -77,5 +84,5 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 		db.execSQL("DELETE FROM marcas");
 		db.execSQL("DELETE FROM produtos");		
 	}
-
+	
 }

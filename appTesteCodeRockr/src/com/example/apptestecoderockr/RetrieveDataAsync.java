@@ -8,9 +8,15 @@
 package com.example.apptestecoderockr;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -25,9 +31,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -38,6 +47,9 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 	String type = "application/x-www-form-urlencoded";
 	String token = "85e4a615f62c711d3aac0e7def5b4903";
 
+	/* Diretório que será criado para salvar as imagens */
+	String diretorioImagens = "/CoderockrApp/";
+
 	/*
 	 * Inicialização da variável 'context' pois o progress dialog será usado em outra activity vinda pelo construtor
 	 */
@@ -45,7 +57,6 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 	CharSequence returnMessage = null;
 	protected SQLiteDatabase BancoProdutos;
 	ProgressDialog dialog;
-	Integer error = 0;
 
 	public RetrieveDataAsync(Context contexto) {
 		context = contexto;
@@ -68,7 +79,8 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 		DatabaseHelper bancoHelper = new DatabaseHelper(context);
 		BancoProdutos = bancoHelper.getReadableDatabase();
 
-		//bancoHelper.ClearTables(BancoProdutos);
+		
+		// bancoHelper.ClearTables(BancoProdutos);
 
 		/* Verificando Conexão com a Internet e se existe dados no database */
 		Cursor cursor = BancoProdutos.rawQuery("SELECT * FROM marcas", null);
@@ -117,14 +129,12 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 		}
 
 		super.onPostExecute(result);
-
 	}
 
 	/* Função para se conectar por http e retornar o dados em Json */
 	private void JsonToBase() {
 
 		JSONArray retorno = null;
-
 		/* Inicia o cliente http e adiciona os headers necessários */
 		HttpClient CodeRClient = new DefaultHttpClient();
 		HttpGet getRequest = new HttpGet(feedUrl);
@@ -137,7 +147,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 			int StatusCode = statusServidor.getStatusCode();
 
 			/* Se o webservice não responder, ele não faz os inserts */
-			
+
 			if (StatusCode != 200) {
 				returnMessage = "O servidor Web não responde";
 			} else {
@@ -154,6 +164,9 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 				/* Realiza o INSERT ou UPDATE no banco */
 				DatabaseHelper bancoHelper = new DatabaseHelper(context);
 				BancoProdutos = bancoHelper.getReadableDatabase();
+				
+				/* Limpa as tabelas antes de inserir */
+				bancoHelper.ClearTables(BancoProdutos);
 
 				for (int i = 0; i < retorno.length(); i++) {
 
@@ -161,11 +174,13 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 					ContentValues dadosInsert = new ContentValues();
 					dadosInsert.put("id", objInner.getString("id"));
 					dadosInsert.put("created", objInner.getString("created"));
-					dadosInsert.put("image", objInner.getString("image"));
 					dadosInsert.put("name", objInner.getString("name"));
 					dadosInsert.put("description", objInner.getString("description"));
+					/* Realiza o download do logotipo da marca e salva a url interna no banco */
+					dadosInsert.put("image",imageToExternalStorage(objInner.getString("image"), diretorioImagens));
+					
 					BancoProdutos.insert("marcas", null, dadosInsert);
-					Log.v("Realizando Insert de Marca:", objInner.getString("name"));
+					
 
 					/* Laço para pegar os produtos dentro das marcas e realizar o insert */
 					JSONArray arrayProduto = objInner.getJSONArray("product_collection");
@@ -178,28 +193,24 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 						dadosInsert.put("featured", objProduto.getString("featured"));
 						dadosInsert.put("price", objProduto.getString("price"));
 						dadosInsert.put("status", objProduto.getString("status"));
-						dadosInsert.put("snapshot", objProduto.getString("snapshot"));
 						dadosInsert.put("idMarca", objInner.getString("id"));
+						/* Realiza o download da imagem do produto e salva a url interna no banco */
+						dadosInsert.put("snapshot", imageToExternalStorage(objProduto.getString("snapshot"), diretorioImagens));
+									
 						BancoProdutos.insert("produtos", null, dadosInsert);
-						Log.v("Realizando Insert de Produto:", objProduto.getString("description"));
 					}
-
 				}
 
 				BancoProdutos.close();
 			}
 
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	/* função que verifica se o dispositivo esta Online */
@@ -211,6 +222,61 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 			return true;
 		}
 		return false;
+	}
+
+	/*
+	 * Realiza o download das imagens para o armazenamento 
+	 * Entrada: url (endereço da imagem na web); dir (diretório onde a imagem deverá ser salva)
+	 * Retorno: storageImage (Endereço da imagem no armazenamento interno ou vazio caso não consiga salvar a imagem
+	 */
+	public String imageToExternalStorage(String url, String dir) {
+
+		String pathInterno = null;
+
+		/* Verifica se diretório da imagens existe; senão existir ele cria */
+		File file = new File(Environment.getExternalStorageDirectory(), dir);
+		if (!file.exists()) {
+			if (!file.mkdirs()) {
+				Log.v("Erro", "Erro ao criar diretório");
+				returnMessage = "não foi possivel criar o diretório";
+			}
+		}
+		
+
+		/* Realizando o download da imagem */
+		try {
+			URL objUrl = new URL(url);
+			HttpURLConnection connection = (HttpURLConnection) objUrl.openConnection();
+			connection.setDoInput(true);
+			connection.connect();
+			InputStream input = connection.getInputStream();
+			Bitmap myBitmap = BitmapFactory.decodeStream(input);
+						
+
+			/* obtem o nome para imagem */
+			String fileName = url.substring( url.lastIndexOf('/')+1, url.length() );
+			String fileNameWithoutExtn = fileName.substring(0, fileName.lastIndexOf('.'));
+			pathInterno = file.getPath() + "/" + fileNameWithoutExtn + ".jpg";
+			
+
+			FileOutputStream stream = new FileOutputStream(pathInterno);
+			ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+			myBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outstream);
+			byte[] byteArray = outstream.toByteArray();
+
+			/* Grava a imagem no armazenamento externo */
+			stream.write(byteArray);
+			stream.close();
+
+		} catch (MalformedURLException e) {
+			Log.v("ERRO IMAGEM", "Erro MalformedURLException "+ url);
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.v("ERRO IMAGEM", "Erro IOException "+ url);
+			e.printStackTrace();
+		}
+
+		return pathInterno;
 	}
 
 }
