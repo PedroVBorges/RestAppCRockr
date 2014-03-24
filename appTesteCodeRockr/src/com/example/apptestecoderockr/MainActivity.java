@@ -7,12 +7,11 @@
  */
 package com.example.apptestecoderockr;
 
-
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.Menu;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,9 +19,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 	
-		RetrieveDataAsync teste = new RetrieveDataAsync(this);
-		teste.execute();
+		RetrieveDataAsync syncWeb = new RetrieveDataAsync(this);
+		syncWeb.execute();
 		
+				
+		
+	
 	}
 
 	@Override

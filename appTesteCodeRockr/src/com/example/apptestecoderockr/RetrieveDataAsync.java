@@ -86,27 +86,20 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 		Cursor cursor = BancoProdutos.rawQuery("SELECT * FROM marcas", null);
 
 		if ((!this.isOnline()) && (cursor.getCount() == 0)) {
-			/*
-			 * Não possui conexão e o banco não possui registros *Deve ativar a * internet*
-			 */
+			/* Não possui conexão e o banco não possui registros *Deve ativar a internet */
 			returnMessage = "Conecte-se ao menos uma vez!";
-			Log.v("Laço", (String) returnMessage);
 
 		} else if ((!this.isOnline()) && (cursor.getCount() != 0)) {
 			/* Não possui conexão e o banco possui registros *Trabalhar OFFLINE* */
 			returnMessage = "Trabalhando em modo Off-Line";
-			Log.v("Laço", (String) returnMessage);
-
+			
 		} else if ((this.isOnline()) && (cursor.getCount() != 0)) {
 			/* Esta Online e tem registros no banco *Atualizar Dados* */
-			Log.v("Laço", "Esta Online e tem registros no banco *Atualizar Dados");
 			this.JsonToBase();
-
+			
 		} else if ((this.isOnline()) && (cursor.getCount() == 0)) {
 			/* Esta Online e não tem registros no banco *Realizar INSERT* */
-			Log.v("Laço", "Esta Online e não tem registros no banco *Realizar INSERT*");
 			this.JsonToBase();
-
 		}
 
 		cursor.close();
@@ -163,7 +156,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 
 				/* Realiza o INSERT ou UPDATE no banco */
 				DatabaseHelper bancoHelper = new DatabaseHelper(context);
-				BancoProdutos = bancoHelper.getReadableDatabase();
+				BancoProdutos = bancoHelper.getWritableDatabase();
 				
 				/* Limpa as tabelas antes de inserir */
 				bancoHelper.ClearTables(BancoProdutos);
@@ -172,7 +165,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 
 					JSONObject objInner = retorno.getJSONObject(i);
 					ContentValues dadosInsert = new ContentValues();
-					dadosInsert.put("id", objInner.getString("id"));
+					dadosInsert.put("_id", objInner.getString("id"));
 					dadosInsert.put("created", objInner.getString("created"));
 					dadosInsert.put("name", objInner.getString("name"));
 					dadosInsert.put("description", objInner.getString("description"));
@@ -187,7 +180,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 					for (int j = 0; j < arrayProduto.length(); j++) {
 						JSONObject objProduto = arrayProduto.getJSONObject(j);
 						dadosInsert.clear();
-						dadosInsert.put("id", objProduto.getString("id"));
+						dadosInsert.put("_id", objProduto.getString("id"));
 						dadosInsert.put("created", objProduto.getString("created"));
 						dadosInsert.put("description", objProduto.getString("description"));
 						dadosInsert.put("featured", objProduto.getString("featured"));

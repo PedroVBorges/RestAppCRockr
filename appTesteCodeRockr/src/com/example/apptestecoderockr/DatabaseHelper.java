@@ -7,22 +7,15 @@
  */
 package com.example.apptestecoderockr;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper{
 	
 	private static final String DATABASE_NAME = "produtos";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	public Context contexto;
 
 	public DatabaseHelper(Context context) {
@@ -47,13 +40,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 		
 		Log.v("Banco : ","criando o banco de dados pela classe createTables");
 		
-		String tableMarca = "create table marcas(id 		 INTEGER NOT NULL, " + 
+		String tableMarca = "create table marcas(_id 		 INTEGER NOT NULL, " + 
 												"created	 TEXT 	 NULL, " + 
 												"image		 TEXT	 NULL, " +
 												"name		 TEXT 	 NULL, " +
 												"description TEXT    NULL) ";
 		
-		String tableProdutos = "create table produtos(id 		 INTEGER NOT NULL, " + 
+		String tableProdutos = "create table produtos(_id 		 INTEGER NOT NULL, " + 
 													"idMarca	 INTEGER NOT NULL, " +
 													"created	 TEXT 	 NULL, " + 
 													"description TEXT    NULL, " +
