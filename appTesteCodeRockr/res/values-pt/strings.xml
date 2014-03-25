@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">App Teste CodeRockr</string>
+   
+    <string name="msg_obtendo_dados">Obtendo dados!</string>
+    <string name="msg_conecte">Conecte-se ao menos uma vez!</string>
+    <string name="msg_offline">Trabalhando em modo Offline</string>
+	<string name="msg_atualizado">Dados Atualizados</string>
+	<string name="msg_server_nao_responde">O servidor Web não responde</string>
+	<string name="msg_erro_criar_dir">não foi possivel criar o diretório</string>
+	
+</resources>

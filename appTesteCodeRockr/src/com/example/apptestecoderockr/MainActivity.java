@@ -8,8 +8,9 @@
 package com.example.apptestecoderockr;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Menu;
 
 public class MainActivity extends Activity {
 
@@ -19,19 +20,28 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 	
+		if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_NORMAL) {     
+			setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		} 
+		else if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL) {     
+			setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		}
+		
+		
+		// Chama a classe principal para atualizar o database
 		RetrieveDataAsync syncWeb = new RetrieveDataAsync(this);
 		syncWeb.execute();
 		
-				
-		
-	
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		super.onDestroy();
 	}
+	
+	
+	
 
 }

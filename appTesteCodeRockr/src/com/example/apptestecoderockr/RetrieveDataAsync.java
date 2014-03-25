@@ -2,7 +2,7 @@
  * Classe para recuperar dados do web service herdando a classe AsyncTask
  * 
  * @author  Pedro Vinícius Borges Basseto
- * @version 2.00, 19/03/14
+ * @version 2.00, 21/03/14
  * 
  */
 package com.example.apptestecoderockr;
@@ -66,8 +66,9 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPreExecute() {
 		dialog = new ProgressDialog(context);
-		dialog.setTitle("Carregando");
-
+		dialog.setTitle(R.string.msg_obtendo_dados);
+		dialog.setCancelable(false);
+		dialog.show();
 		super.onPreExecute();
 	}
 
@@ -84,27 +85,19 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 		/* Verificando Conexão com a Internet e se existe dados no database */
 		Cursor cursor = BancoProdutos.rawQuery("SELECT * FROM marcas", null);
 
-		if ((!this.isOnline()) && (cursor.getCount() == 0)) {
+		if ((!this.isOnline()) && (cursor.getCount() <= 1)) {
 			/* Não possui conexão e o banco não possui registros *Deve ativar a internet */
-			returnMessage = "Conecte-se ao menos uma vez!";
+			returnMessage = context.getString(R.string.msg_conecte);
 
-		} else if ((!this.isOnline()) && (cursor.getCount() != 0)) {
+		} else if ((!this.isOnline()) && (cursor.getCount() > 1)) {
 			/* Não possui conexão e o banco possui registros *Trabalhar OFFLINE* */
-			returnMessage = "Trabalhando em modo Off-Line";
+			returnMessage = context.getString(R.string.msg_offline);
 
-		} else if ((this.isOnline()) && (cursor.getCount() != 0)) {
-			/* Esta Online e tem registros no banco *Atualizar Dados* */
+		} else {
 			this.JsonToBase();
-			returnMessage = "Dados Atualizados";
-
-		} else if ((this.isOnline()) && (cursor.getCount() == 0)) {
-			/* Esta Online e não tem registros no banco *Realizar INSERT* */
-			// dialog.show();
-			this.JsonToBase();
+			returnMessage = context.getString(R.string.msg_atualizado);
 		}
 
-		/*cursor.close();
-		BancoProdutos.close();*/
 		return null;
 
 	}
@@ -114,7 +107,12 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 	 */
 	@Override
 	protected void onPostExecute(Void result) {
+		
 
+       if(dialog.isShowing()){
+		   dialog.dismiss();
+	   }
+		
 	   if (returnMessage != null) {
 			int duration = Toast.LENGTH_LONG;
 			Toast toast = Toast.makeText(context, returnMessage, duration);
@@ -143,7 +141,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 			/* Se o webservice não responder, ele não faz os inserts */
 
 			if (StatusCode != 200) {
-				returnMessage = "O servidor Web não responde";
+				returnMessage = context.getString(R.string.msg_server_nao_responde);
 			} else {
 				InputStream jsonStream = response.getEntity().getContent();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(jsonStream));
@@ -231,8 +229,7 @@ public class RetrieveDataAsync extends AsyncTask<Void, Void, Void> {
 		File file = new File(Environment.getExternalStorageDirectory(), dir);
 		if (!file.exists()) {
 			if (!file.mkdirs()) {
-				Log.v("Erro", "Erro ao criar diretório");
-				returnMessage = "não foi possivel criar o diretório";
+				returnMessage = context.getString(R.string.msg_erro_criar_dir);
 			}
 		}
 

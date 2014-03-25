@@ -7,6 +7,7 @@
  */
 package com.example.apptestecoderockr;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -26,6 +27,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		this.CreateTables(db);
+		
+		//Insere dados dummy no banco para inicializar os componentes
+		insertDummy(db);
 	}
 
 	@Override
@@ -76,6 +80,19 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 		Log.v("Banco : ","Limpando Tabelas do database");
 		db.execSQL("DELETE FROM marcas");
 		db.execSQL("DELETE FROM produtos");		
+	}
+	
+	/* Adiciona um Dummy no banco para inicializar os componentes */
+	public void insertDummy(SQLiteDatabase db){
+		ContentValues dummyMarcas = new ContentValues(); 
+		ContentValues dummyProdutos = new ContentValues(); 
+		
+		dummyMarcas.put("_id", 1);
+		db.insert("marcas", null, dummyMarcas);
+		
+		dummyProdutos.put("_id", 1);
+		dummyProdutos.put("idMarca", 1);
+		db.insert("produtos", null, dummyProdutos);		
 	}
 	
 }

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -22,18 +21,14 @@ public class MarcaList extends ListFragment {
 
         DatabaseHelper db = new DatabaseHelper(getActivity());
 		SQLiteDatabase BancoProdutos = db.getReadableDatabase();
-		Cursor cursor = BancoProdutos.query("marcas", new String[] {"_id", "name", "description"}, null, null, null, null, null);
-		
-		
+		Cursor cursor = BancoProdutos.query("marcas", new String[] {"_id", "name"}, null, null, null, null, null);
 		
 		@SuppressWarnings("deprecation")
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_2, cursor,  new String[] {"name", "description"}, new int[] {android.R.id.text1, android.R.id.text2});
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_1, cursor,  new String[] {"name"}, new int[] {android.R.id.text1});
 		
-        
         /* Popula os dados do cursor com o listview */
         setListAdapter(adapter);
        
-
         /* Checa se a tela tem inicializado o fragment 2, para assim saber se é tablet ou smartphone */
         View detailsFrame = getActivity().findViewById(R.id.details);
         mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
@@ -71,8 +66,7 @@ public class MarcaList extends ListFragment {
         mCurCheckPosition = index;
 
         if (mDualPane) {
-        	Log.v("Entrou no activity tablet", "Entrou no activity tablet");
-          
+        	      
             getListView().setItemChecked(index, true);
 
             // checa qual fragment esta sendo exibido, ele da um replace se for necessário            
@@ -89,13 +83,14 @@ public class MarcaList extends ListFragment {
             }
 
         } else {
-           
-        	Log.v("Entrou no activity single", "Entrou no activity single " + index);
-            Intent intent = new Intent();
+        	
+        	Intent intent = new Intent();
             intent.setClass(getActivity(), ProdutoActivity.class);
-           
             intent.putExtra("index", index);
             startActivity(intent);
+            
         }
     }
+
+  
 }
