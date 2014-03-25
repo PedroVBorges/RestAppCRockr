@@ -1,52 +1,44 @@
 package com.example.apptestecoderockr;
 
 import android.os.Bundle;
-import android.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.app.ListFragment;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.widget.SimpleCursorAdapter;
 
-public class ProdutoDetails extends Fragment {
-    /**
-     * Create a new instance of DetailsFragment, initialized to
-     * show the text at 'index'.
-     */
-    public static ProdutoDetails newInstance(int index) {
-    	ProdutoDetails f = new ProdutoDetails();
+public class ProdutoDetails extends ListFragment {
 
-        // Supply index input as an argument.
-        Bundle args = new Bundle();
-        args.putInt("index", index);
-        f.setArguments(args);
+	// cria uma nova instância do ProdutoDetails.
+	public static ProdutoDetails newInstance(int index) {
+		ProdutoDetails f = new ProdutoDetails();
+		Bundle args = new Bundle();
+		args.putInt("index", index);
+		f.setArguments(args);
+		return f;
+	}
 
-        return f;
-    }
+	// Retorna o index que foi passado para ListFragment pelo putExtra
+	public int getShownIndex() {
+		return getArguments().getInt("index", 1); //Definido 1; pois é a primeira row da tabela
+	}
 
-    public int getShownIndex() {
-        return getArguments().getInt("index", 0);
-    }
+	//Função principal onActivityCreated; chama o loadProdutos para popular os dados
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		loadProdutos(getShownIndex());
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        if (container == null) {
-            // We have different layouts, and in one of them this
-            // fragment's containing frame doesn't exist.  The fragment
-            // may still be created from its saved state, but there is
-            // no reason to try to create its view hierarchy because it
-            // won't be displayed.  Note this is not needed -- we could
-            // just run the code below, where we would create and return
-            // the view hierarchy; it would just never be used.
-            return null;
-        }
+	//Função para popular os dados dos produtos no listFragment
+	public void loadProdutos(Integer id) {
+		DatabaseHelper db = new DatabaseHelper(getActivity());
+		SQLiteDatabase BancoProdutos = db.getReadableDatabase();
+		Cursor cursor = BancoProdutos.query("produtos", new String[] { "_id", "price", "description" }, "idMarca = " + String.valueOf(id), null, null, null, null);
 
-        /*ScrollView scroller = new ScrollView(getActivity());
-        TextView text = new TextView(getActivity());
-        int padding = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                4, getActivity().getResources().getDisplayMetrics());
-        text.setPadding(padding, padding, padding, padding);
-        scroller.addView(text);
-        text.setText(Shakespeare.DIALOGUE[getShownIndex()]);*/
-        return null;
-    }
+		@SuppressWarnings("deprecation")
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_2, cursor, new String[] { "description", "price" }, new int[] { android.R.id.text1, android.R.id.text2 });
+		
+		setListAdapter(adapter);
+	}
+
 }

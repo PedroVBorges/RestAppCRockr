@@ -10,27 +10,29 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+
 public class MarcaList extends ListFragment {
     boolean mDualPane;
-    int mCurCheckPosition = 0;
+    int mCurCheckPosition = 1;
+    
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        
         DatabaseHelper db = new DatabaseHelper(getActivity());
 		SQLiteDatabase BancoProdutos = db.getReadableDatabase();
 		Cursor cursor = BancoProdutos.query("marcas", new String[] {"_id", "name", "description"}, null, null, null, null, null);
-
+		
+		
 		
 		@SuppressWarnings("deprecation")
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), 
-				android.R.layout.simple_list_item_2, cursor,  new String[] {"name", "description"}, new int[] {android.R.id.text1, android.R.id.text2});
-        
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_2, cursor,  new String[] {"name", "description"}, new int[] {android.R.id.text1, android.R.id.text2});
+		
         
         /* Popula os dados do cursor com o listview */
         setListAdapter(adapter);
+       
 
         /* Checa se a tela tem inicializado o fragment 2, para assim saber se é tablet ou smartphone */
         View detailsFrame = getActivity().findViewById(R.id.details);
@@ -55,7 +57,9 @@ public class MarcaList extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        showDetails(position);
+    	Cursor _IDCursor = (Cursor) l.getItemAtPosition(position);
+    	Integer _IDCollum = _IDCursor.getInt(_IDCursor.getColumnIndexOrThrow("_id"));
+        showDetails(_IDCollum);
     }
 
     /**
@@ -71,28 +75,25 @@ public class MarcaList extends ListFragment {
           
             getListView().setItemChecked(index, true);
 
-            // chega qual fragmento esta sendo exibido, ele da um replace se for necessário            
+            // checa qual fragment esta sendo exibido, ele da um replace se for necessário            
             ProdutoDetails details = (ProdutoDetails) getFragmentManager().findFragmentById(R.id.details);
             if (details == null || details.getShownIndex() != index) {
                 // Make new fragment to show this selection.
                 details = ProdutoDetails.newInstance(index);
-
+               
                 // Executa o transaction, dando replace em qualquer fragment
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                if (index == 0) {
-                	ft.replace(R.id.details, details);
-                } else {
-                	ft.replace(R.id.details, details);
-                }
+                ft.replace(R.id.details, details);
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                 ft.commit();
             }
 
         } else {
            
-        	Log.v("Entrou no activity single", "Entrou no activity single");
+        	Log.v("Entrou no activity single", "Entrou no activity single " + index);
             Intent intent = new Intent();
             intent.setClass(getActivity(), ProdutoActivity.class);
+           
             intent.putExtra("index", index);
             startActivity(intent);
         }
