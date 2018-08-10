@@ -1,15 +1,3 @@
-# Objetivos
-
-O objetivo deste teste é verificar os conhecimentos dos candidatos a vaga de [developer Android](https://gist.github.com/eminetto/8842616) da Coderockr
-
-## Procedimentos e requisitos
-
-1. Clonar esse projeto
-2. Enviar um e-mail para jobs@coderockr.com passando uma estimativa de tempo para término do teste
-2. Implementar a interface conforme exemplo do diretório Design. O design deve ser adaptado para ser executado tanto em tablets com em smartphones
-3. Usar o REST service descrito abaixo para requisitar os dados e apresentar na interface
-4. O aplicativo deve armazenar os dados em um banco de dados local e usá-lo caso o dispositivo esteja fora da internet
-4. Enviar por email o link do repositório clonado para jobs@coderockr.com junto com o tempo realmente usado para realizar o teste. 
 
 ### REST Service
 
@@ -82,20 +70,3 @@ O resultado da requisição é no formato JSON, conforme o exemplo abaixo:
   }
 ] 
 ```
-
-## O que será avaliado
-
-- Atenção aos detalhes da interface
-- Conversão da interface para smartphones
-- Ausência de erros
-- Tratamento de erros 
-- Clareza dos códigos 
-- Histórico de commits no Github
-- Organização das classes e estruturas criadas
-- Pontos extra serão ganhos caso o aplicativo tenha testes unitários
-
-## Dúvidas
-
-Quaisquer dúvidas enviar para eminetto@coderockr.com
-
-
